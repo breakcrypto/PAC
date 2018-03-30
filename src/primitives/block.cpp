@@ -9,10 +9,11 @@
 #include "tinyformat.h"
 #include "utilstrencodings.h"
 #include "crypto/common.h"
+#include "chainparams.h"
 
 uint256 CBlockHeader::GetHash() const
 {
-    if(nTime < 1522424700) {
+    if(nTime < Params().HARD_FORK_TIME_A) {
         return HashX11(BEGIN(nVersion), END(nNonce));
     }
     return HashC11(BEGIN(nVersion), END(nNonce));
