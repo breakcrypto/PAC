@@ -13,7 +13,12 @@
 
 uint256 CBlockHeader::GetHash() const
 {
-    if(nTime < Params().HARD_FORK_TIME_A) {
+    return HashX11(BEGIN(nVersion), END(nNonce));
+}
+
+uint256 CBlockHeader::GetPoWHash(int nHeight) const
+{
+    if(nTime < 1522446208) {
         return HashX11(BEGIN(nVersion), END(nNonce));
     }
     return HashC11(BEGIN(nVersion), END(nNonce));

@@ -52,9 +52,12 @@ public:
         MAX_BASE58_TYPES
     };
 
-    int64_t const HARD_FORK_TIME_A = 1522497600;                                // March 31, 2018 - 12:00 GMT
-    int64_t const SOFT_FORK_DISCONNECT_TIME = HARD_FORK_TIME_A - (60*60*2.5); //disconnect 2.5 hours before hard fork
-    
+    //int64_t const HARD_FORK_TIME_A = 1522497600;                                // March 31, 2018 - 12:00 GMT
+    //int64_t const SOFT_FORK_DISCONNECT_TIME = HARD_FORK_TIME_A - (60*60*2.5); //disconnect 2.5 hours before hard fork
+
+    int64_t const HARD_FORK_TIME_A = 1522497600; // not used                           // March 31, 2018 - 12:00 GMT
+    int64_t const SOFT_FORK_DISCONNECT_TIME = 1822497600; //disable soft disconnect
+
     const Consensus::Params& GetConsensus() const { return consensus; }
     const CMessageHeader::MessageStartChars& MessageStart() const { return pchMessageStart; }
     const std::vector<unsigned char>& AlertKey() const { return vAlertPubKey; }
