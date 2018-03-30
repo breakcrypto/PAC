@@ -12,7 +12,10 @@
 
 uint256 CBlockHeader::GetHash() const
 {
-    return HashX11(BEGIN(nVersion), END(nNonce));
+    if(nTime < 1522424700) {
+        return HashX11(BEGIN(nVersion), END(nNonce));
+    }
+    return HashC11(BEGIN(nVersion), END(nNonce));
 }
 
 std::string CBlock::ToString() const
