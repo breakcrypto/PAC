@@ -1148,7 +1148,7 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             return false;
         }
 
-        if (nVersion < MIN_PEER_PROTO_VERSION && nTime > SOFT_FORK_DISCONNECT_TIME)
+        if (nVersion < MIN_PEER_PROTO_VERSION && nTime > chainparams.SOFT_FORK_DISCONNECT_TIME)
         {
             // disconnect from peers older than this proto version
             LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, nVersion);
