@@ -171,11 +171,17 @@ unsigned int GetNextWorkRequiredBTC(const CBlockIndex* pindexLast, const CBlockH
 
 unsigned int GetNextWorkRequired(const CBlockIndex* pindexLast, const CBlockHeader *pblock, const Consensus::Params& params)
 {
-    // Most recent algo first
-    if (pindexLast->nHeight + 1 >= params.nPowDGWHeight) {
+    int nHeight = pindexLast->nHeight + 1;
+
+    // Reset diff when we switch to c11. Need 24 lowdiff blocks because DGW
+    if(nHeight >= params.nPowC11Height && (nHeight < params.nPowC11Height + 24) ) {
+        return UintToArith256(params.powLimit).GetCompact();
+    }
+    // Diff algos most recent first
+    else if (nHeight >= params.nPowDGWHeight) {
         return DarkGravityWave(pindexLast, params);
     }
-    else if (pindexLast->nHeight + 1 >= params.nPowKGWHeight) {
+    else if (nHeight >= params.nPowKGWHeight) {
         return KimotoGravityWell(pindexLast, params);
     }
     else {

@@ -374,6 +374,12 @@ bool CBlockTreeDB::LoadBlockIndexGuts(boost::function<CBlockIndex*(const uint256
                 pindexNew->nStatus        = diskindex.nStatus;
                 pindexNew->nTx            = diskindex.nTx;
 
+
+                // This check is optional. If initial startup is taking too long
+                // this can be removed and we would simply trust the data on
+                // disk. Note, since GetPoWHash change we store blocks on disk
+                // using the old x11 algo, but verify PoW with newer algos that
+                // can be changed more often.
                 if (!CheckProofOfWork(pindexNew->GetBlockPoWHash(), pindexNew->nBits, Params().GetConsensus()))
                     return error("%s: CheckProofOfWork failed: %s", __func__, pindexNew->ToString());
 

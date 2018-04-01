@@ -18,10 +18,11 @@ uint256 CBlockHeader::GetHash() const
 
 uint256 CBlockHeader::GetPoWHash(int nHeight) const
 {
-    if(nTime < 1522446208) {
+    if(nHeight >= Params().GetConsensus().nPowC11Height) {
+        return HashC11(BEGIN(nVersion), END(nNonce));
+    } else {
         return HashX11(BEGIN(nVersion), END(nNonce));
     }
-    return HashC11(BEGIN(nVersion), END(nNonce));
 }
 
 std::string CBlock::ToString() const

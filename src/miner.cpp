@@ -468,6 +468,9 @@ void static BitcoinMiner(const CChainParams& chainparams, CConnman& connman)
                         // Found a solution
                         SetThreadPriority(THREAD_PRIORITY_NORMAL);
                         LogPrintf("PaccoinMiner:\n  proof-of-work found\n  hash: %s\n  target: %s\n", hash.GetHex(), hashTarget.GetHex());
+                        LogPrintf("PaccoinMiner: PrevDiff: %08x  %s\n", pindexPrev->nBits, arith_uint256().SetCompact(pindexPrev->nBits).ToString());
+                        LogPrintf("PaccoinMiner: ThisDiff: %08x  %s\n", pblock->nBits, arith_uint256().SetCompact(pblock->nBits).ToString());
+
                         ProcessBlockFound(pblock, chainparams);
                         SetThreadPriority(THREAD_PRIORITY_LOWEST);
                         coinbaseScript->KeepScript();
