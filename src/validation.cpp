@@ -1262,8 +1262,13 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
 
 CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
 {
-    double dMasternodePart = 9.0/16.0;
-    CAmount ret = blockValue * dMasternodePart; // 45% of the total block reward.
+    double dMasternodePart = 9.0 / 16.0; // pre-fork, MNs were 45%
+
+    if(nPrevHeight >= chainparams.GetConsensus().nPowC11Height) {
+        dMasternodePart = 9.0 / 10.0;
+    }
+
+    CAmount ret = blockValue * dMasternodePart; // 90% of the total block reward.
     return ret;
 }
 
@@ -1273,8 +1278,12 @@ double GetSubsidyMultiplier(int nPrevHeight, int nSubsidyAdjustmentInterval)
     
     if (nPrevHeight < 100) {
         dMultiplier = 1.0;
-    } else if (nPrevHeight <= nSubsidyAdjustmentInterval * 1) {
-        dMultiplier = 3.0/5.0;
+    } else if (nPrevHeight <= nSubsidyAdjustmentInterval * 1 && nPrevHeight) {
+        if(nPrevHeight <= chainparams.GetConsensus().nPowC11Height-1) {
+            dMultiplier = 3.0 / 5.0;
+        } else {
+            dMultiplier = 3.0 / 8.0;
+        }
     } else if (nPrevHeight <= nSubsidyAdjustmentInterval * 2) {
         dMultiplier = 4.0/5.0;
     } else if (nPrevHeight <= nSubsidyAdjustmentInterval * 14) {
