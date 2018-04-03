@@ -334,7 +334,6 @@ UniValue gobject(const UniValue& params, bool fHelp)
         CMasternode mn;
         bool fMnFound = mnodeman.Get(activeMasternode.outpoint, mn);
 
-
         if(!fMnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
