@@ -334,10 +334,21 @@ UniValue gobject(const UniValue& params, bool fHelp)
         CMasternode mn;
         bool fMnFound = mnodeman.Get(activeMasternode.outpoint, mn);
 
+
         if(!fMnFound) {
             nFailed++;
             statusObj.push_back(Pair("result", "failed"));
             statusObj.push_back(Pair("errorMessage", "Can't find masternode by collateral output"));
+            resultsObj.push_back(Pair("paccoin.conf", statusObj));
+            returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
+            returnObj.push_back(Pair("detail", resultsObj));
+            return returnObj;
+        }
+
+        if(mn.IsWatchdogExpired()) {
+            nFailed++;
+            statusObj.push_back(Pair("result", "failed"));
+            statusObj.push_back(Pair("errorMessage", "WATCHDOG_EXPIRED nodes aren't allowed to vote."));
             resultsObj.push_back(Pair("paccoin.conf", statusObj));
             returnObj.push_back(Pair("overall", strprintf("Voted successfully %d time(s) and failed %d time(s).", nSuccessful, nFailed)));
             returnObj.push_back(Pair("detail", resultsObj));

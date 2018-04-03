@@ -1243,10 +1243,12 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     if (nPrevHeight < 100)
     {
         nSubsidyBase = 35500000;
-    } else {
+    } else if (nPrevHeight + 1 < consensusParams.nPowC11Height) {
         // 11111111111/(((x+4201)/9)^2)
         // nSubsidyBase = (11111111111.0 / (pow((dDiff+4201.0)/9.0,2.0)));
         nSubsidyBase = 23000;
+    } else {
+        nSubsidyBase = 14375;
     }
 
     // Projected ~100B coins by year 2043.
@@ -1260,11 +1262,17 @@ CAmount GetBlockSubsidy(int nPrevBits, int nPrevHeight, const Consensus::Params&
     return fSuperblockPartOnly ? nSuperblockPart : nSubsidy - nSuperblockPart;
 }
 
-CAmount GetMasternodePayment(int nHeight, CAmount blockValue)
+CAmount GetMasternodePayment(int nHeight, CAmount blockValue, const Consensus::Params& consensusParams)
 {
-    double dMasternodePart = 9.0/16.0;
-    CAmount ret = blockValue * dMasternodePart; // 45% of the total block reward.
-    return ret;
+    double dMasternodePart;
+
+    if(nHeight < consensusParams.nPowC11Height){
+        dMasternodePart = 9.0/16.0; // 56.25% of the total block reward.
+    } else {
+        dMasternodePart = 9.0/10.0; // 90% of the total block reward.
+    }
+
+    return (blockValue * dMasternodePart);
 }
 
 double GetSubsidyMultiplier(int nPrevHeight, int nSubsidyAdjustmentInterval)

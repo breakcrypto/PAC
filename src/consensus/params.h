@@ -82,6 +82,7 @@ struct Params {
     int nPowKGWHeight;
     int nPowDGWHeight;
     int nPowC11Height;
+    int nPowC11DisconnectWindow;
     int64_t DifficultyAdjustmentInterval() const { return nPowTargetTimespan / nPowTargetSpacing; }
     uint256 nMinimumChainWork;
     uint256 defaultAssumeValid;

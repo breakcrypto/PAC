@@ -1148,27 +1148,25 @@ bool static ProcessMessage(CNode* pfrom, string strCommand, CDataStream& vRecv, 
             return false;
         }
 
-
-        // Don't connect to old peers 120 minutes from the fork (120 min / 2.5 blk/min = 48 blk)
-        if (nVersion < C11_VERSION && connman.GetBestHeight() > (chainparams.GetConsensus().nPowC11Height - 48))
-        {
-            // disconnect from peers that don't have c11 version
-            LogPrintf("SoftFork: peer=%d using obsolete version %i; disconnecting\n", pfrom->id, nVersion);
-            connman.PushMessageWithVersion(pfrom, INIT_PROTO_VERSION, NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
-                                           strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION));
-            pfrom->fDisconnect = true;
-            return false;
-            //HANDLE SOFT FORKS
-        }
-
         if (nVersion < MIN_PEER_PROTO_VERSION) {
-            //step back a version until if we're under the soft_fork height
             // disconnect from peers older than this proto version
             LogPrintf("peer=%d using obsolete version %i; disconnecting\n", pfrom->id, nVersion);
             connman.PushMessageWithVersion(pfrom, INIT_PROTO_VERSION, NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
                                            strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION));
             pfrom->fDisconnect = true;
             return false;
+        }
+
+        // Don't connect to old peers 120 minutes from the fork (120 min / 2.5 blk/min = 48 blk)
+        if (nVersion < C11_VERSION && connman.GetBestHeight() > (chainparams.GetConsensus().nPowC11Height - chainparams.GetConsensus().nPowC11DisconnectWindow))
+        {
+            // disconnect from peers that don't have c11 version
+            LogPrintf("C11 SoftFork: peer=%d using obsolete version %i; disconnecting\n", pfrom->id, nVersion);
+            connman.PushMessageWithVersion(pfrom, INIT_PROTO_VERSION, NetMsgType::REJECT, strCommand, REJECT_OBSOLETE,
+                                           strprintf("Version must be %d or greater", MIN_PEER_PROTO_VERSION));
+            pfrom->fDisconnect = true;
+            return false;
+            //HANDLE SOFT FORKS
         }
 
         if (nVersion == 10300)

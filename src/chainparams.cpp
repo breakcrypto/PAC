@@ -145,6 +145,7 @@ public:
         consensus.nPowKGWHeight = 15200;
         consensus.nPowDGWHeight = 34140;
         consensus.nPowC11Height = 55009;  // 55009 height aproximately on Sat April 28th
+        consensus.nPowC11DisconnectWindow = 3 * 576;  // Disconnect peers ~3 days before fork
         consensus.nRuleChangeActivationThreshold = 1916; // 95% of 2016
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -266,7 +267,8 @@ public:
         consensus.fPowNoRetargeting = false;
         consensus.nPowKGWHeight = 4001; // nPowKGWHeight >= nPowDGWHeight means "no KGW"
         consensus.nPowDGWHeight = 4001;
-        consensus.nPowC11Height = 6100;
+        consensus.nPowC11Height = 6150;
+        consensus.nPowC11DisconnectWindow = 48;
         consensus.nRuleChangeActivationThreshold = 1512; // 75% for testchains
         consensus.nMinerConfirmationWindow = 2016; // nPowTargetTimespan / nPowTargetSpacing
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
@@ -383,6 +385,7 @@ public:
         consensus.nPowKGWHeight = 15200; // same as mainnet
         consensus.nPowDGWHeight = 34140; // same as mainnet
         consensus.nPowC11Height = 55009; // same as mainnet // 55009 height aproximately on Sat April 28th
+        consensus.nPowC11DisconnectWindow = 3 * 576; // same as mainnet // Disconnect peers ~3 days before fork
         consensus.nRuleChangeActivationThreshold = 108; // 75% for testchains
         consensus.nMinerConfirmationWindow = 144; // Faster than normal for regtest (144 instead of 2016)
         consensus.vDeployments[Consensus::DEPLOYMENT_TESTDUMMY].bit = 28;
