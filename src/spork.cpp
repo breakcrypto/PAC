@@ -41,6 +41,12 @@ void CSporkManager::ProcessSpork(CNode* pfrom, std::string& strCommand, CDataStr
                 LogPrint("spork", "%s seen\n", strLogMsg);
                 return;
             } else {
+
+                if (IsFuseSpork(spork.nSporkID) && IsSporkActive(spork.nSporkID) && !(spork.nValue == 15256000 && Params().NetworkIDString() != "main")) {
+                    strLogMsg = strprintf("SPORK ERROR! -- can't update fused spork %d sporkval = %d bestHeight = %d\n", spork.nSporkID, spork.nValue, connman.GetBestHeight());
+                    return;
+                }
+
                 LogPrintf("%s updated\n", strLogMsg);
             }
         } else {
@@ -52,6 +58,8 @@ void CSporkManager::ProcessSpork(CNode* pfrom, std::string& strCommand, CDataStr
             Misbehaving(pfrom->GetId(), 100);
             return;
         }
+
+
 
         mapSporks[hash] = spork;
         mapSporksActive[spork.nSporkID] = spork;
@@ -104,6 +112,16 @@ void CSporkManager::ExecuteSpork(int nSporkID, int nValue)
 bool CSporkManager::UpdateSpork(int nSporkID, int64_t nValue, CConnman& connman)
 {
 
+    if (IsFuseSpork(nSporkID) && IsSporkActive(nSporkID) && !(nValue == 15256000 && Params().NetworkIDString() != "main")) {
+        LogPrintf("CSporkManager::UpdateSpork -- Error: can't update fused. sporkid =  %d sporkval = %d bestHeight = %d\n", nSporkID, GetSporkValue(nSporkID), connman.GetBestHeight());
+        return false;
+    }
+
+    if (IsFuseSpork(nSporkID) && nValue <= connman.GetBestHeight() ) {
+        LogPrintf("CSporkManager::UpdateSpork -- Error: can't set spork in the past. sporkid =  %d sporkval = %d bestHeight = %d\n", nSporkID, GetSporkValue(nSporkID), connman.GetBestHeight());
+        return false;
+    }
+
     CSporkMessage spork = CSporkMessage(nSporkID, nValue, GetAdjustedTime());
 
     if(spork.Sign(strMasterPrivKey)) {
@@ -114,6 +132,15 @@ bool CSporkManager::UpdateSpork(int nSporkID, int64_t nValue, CConnman& connman)
     }
 
     return false;
+}
+
+// test for fuse sporks
+bool CSporkManager::IsFuseSpork(int nSporkID)
+{
+     switch (nSporkID) {
+        case SPORK_15_FUSE_C11_POWHASH_HEIGHT:               return true;
+        default: return false;
+     }
 }
 
 // grab the spork, otherwise say it's off
@@ -134,6 +161,7 @@ bool CSporkManager::IsSporkActive(int nSporkID)
             case SPORK_12_RECONSIDER_BLOCKS:                r = SPORK_12_RECONSIDER_BLOCKS_DEFAULT; break;
             case SPORK_13_OLD_SUPERBLOCK_FLAG:              r = SPORK_13_OLD_SUPERBLOCK_FLAG_DEFAULT; break;
             case SPORK_14_REQUIRE_SENTINEL_FLAG:            r = SPORK_14_REQUIRE_SENTINEL_FLAG_DEFAULT; break;
+            case SPORK_15_FUSE_C11_POWHASH_HEIGHT:          r = SPORK_15_FUSE_C11_POWHASH_HEIGHT_DEFAULT; break;
             default:
                 LogPrint("spork", "CSporkManager::IsSporkActive -- Unknown Spork ID %d\n", nSporkID);
                 r = 4070908800ULL; // 2099-1-1 i.e. off by default
@@ -141,7 +169,13 @@ bool CSporkManager::IsSporkActive(int nSporkID)
         }
     }
 
-    return r < GetAdjustedTime();
+    if(IsFuseSpork(nSporkID)) {
+        LOCK(cs_main);
+        return r < chainActive.Height();
+    } else {
+        return r < GetAdjustedTime();
+    }
+
 }
 
 // grab the value of the spork on the network, or the default
@@ -160,6 +194,7 @@ int64_t CSporkManager::GetSporkValue(int nSporkID)
         case SPORK_12_RECONSIDER_BLOCKS:                return SPORK_12_RECONSIDER_BLOCKS_DEFAULT;
         case SPORK_13_OLD_SUPERBLOCK_FLAG:              return SPORK_13_OLD_SUPERBLOCK_FLAG_DEFAULT;
         case SPORK_14_REQUIRE_SENTINEL_FLAG:            return SPORK_14_REQUIRE_SENTINEL_FLAG_DEFAULT;
+        case SPORK_15_FUSE_C11_POWHASH_HEIGHT:          return SPORK_15_FUSE_C11_POWHASH_HEIGHT_DEFAULT;
         default:
             LogPrint("spork", "CSporkManager::GetSporkValue -- Unknown Spork ID %d\n", nSporkID);
             return -1;
@@ -178,6 +213,7 @@ int CSporkManager::GetSporkIDByName(std::string strName)
     if (strName == "SPORK_12_RECONSIDER_BLOCKS")                return SPORK_12_RECONSIDER_BLOCKS;
     if (strName == "SPORK_13_OLD_SUPERBLOCK_FLAG")              return SPORK_13_OLD_SUPERBLOCK_FLAG;
     if (strName == "SPORK_14_REQUIRE_SENTINEL_FLAG")            return SPORK_14_REQUIRE_SENTINEL_FLAG;
+    if (strName == "SPORK_15_FUSE_C11_POWHASH_HEIGHT")          return SPORK_15_FUSE_C11_POWHASH_HEIGHT;
 
     LogPrint("spork", "CSporkManager::GetSporkIDByName -- Unknown Spork name '%s'\n", strName);
     return -1;
@@ -195,6 +231,7 @@ std::string CSporkManager::GetSporkNameByID(int nSporkID)
         case SPORK_12_RECONSIDER_BLOCKS:                return "SPORK_12_RECONSIDER_BLOCKS";
         case SPORK_13_OLD_SUPERBLOCK_FLAG:              return "SPORK_13_OLD_SUPERBLOCK_FLAG";
         case SPORK_14_REQUIRE_SENTINEL_FLAG:            return "SPORK_14_REQUIRE_SENTINEL_FLAG";
+        case SPORK_15_FUSE_C11_POWHASH_HEIGHT:          return "SPORK_15_FUSE_C11_POWHASH_HEIGHT";
         default:
             LogPrint("spork", "CSporkManager::GetSporkNameByID -- Unknown Spork ID %d\n", nSporkID);
             return "Unknown";

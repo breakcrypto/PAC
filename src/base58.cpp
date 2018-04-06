@@ -335,3 +335,8 @@ bool CBitcoinSecret::SetString(const std::string& strSecret)
 {
     return SetString(strSecret.c_str());
 }
+
+std::string CBitcoinSecret::ToString() const
+{
+    return CBase58Data::ToString();
+}

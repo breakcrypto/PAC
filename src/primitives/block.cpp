@@ -10,6 +10,7 @@
 #include "utilstrencodings.h"
 #include "crypto/common.h"
 #include "chainparams.h"
+#include "spork.h"
 
 uint256 CBlockHeader::GetHash() const
 {
